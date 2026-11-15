@@ -1,0 +1,61 @@
+{
+  "appVersion": "26.1111.2228.0",
+  "generation": {
+    "moduleUrl": "./assets/348410.374a9b8f98.js",
+    "moduleScript": "348410.374a9b8f98.js",
+    "catchupScript": "899469.2318ef590b.js",
+    "catchupNeedle": "return await (0,p._qC)((0,x.P)(y.requestUserMessagePrediction(o,a)),e)",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "serviceTier": "default",
+    "timeoutMs": 120000,
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "suggestion": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "suggestion"
+      ],
+      "additionalProperties": false
+    },
+    "bindings": {
+      "services": {
+        "moduleId": "GaA7",
+        "export": "appServices",
+        "factorySha256": "622f97f6d9a3ef93b63aecd0ac629b20311b48a8da525126cae56618724c04aa"
+      },
+      "callback": {
+        "moduleId": "ZG9f",
+        "export": "AX",
+        "factorySha256": "305f485c0474af34d25da01f16b31a73b7e2e579c9a769501163fa1047290cd0"
+      },
+      "bridge": {
+        "moduleId": "TL6G",
+        "export": "O1",
+        "factorySha256": "0fa0b5aa18b1d3abb3aa221a63184411c1f238260d0f6130c066990ced952843"
+      },
+      "consume": {
+        "moduleId": "q77y",
+        "export": "P",
+        "factorySha256": "0fba414f61c661d70e8a590a5aef4b5c0bbead8768377167e6bf23dd30528366"
+      }
+    },
+    "loader": "rspack",
+    "catchupServiceLocal": "y"
+  },
+  "scripts": {
+    "899469.2318ef590b.js": {
+      "sha256": "164339682dd86986cbbe986981dadfc54f3933c5cd61fffbe38afba99fc0684c",
+      "hooks": []
+    },
+    "348410.374a9b8f98.js": {
+      "sha256": "0524ee891262587e2605b573f75ebb1cce4df2b3db154a8f14a2f24a9e80dc0b",
+      "hooks": []
+    }
+  }
+}

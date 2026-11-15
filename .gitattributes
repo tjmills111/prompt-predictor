@@ -1,0 +1,2 @@
+# Preserve exact reviewed bytes, especially the tested package integrity manifest.
+* -text

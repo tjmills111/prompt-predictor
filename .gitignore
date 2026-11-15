@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+**/operation-*.json
+**/operation-*.json.tmp
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.log
+*.pem
+*.key
+*.cer
+.env
+.env.*

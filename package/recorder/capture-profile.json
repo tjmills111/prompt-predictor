@@ -1,0 +1,39 @@
+{
+  "appVersion": "26.1111.2228.0",
+  "scripts": {
+    "899469.2318ef590b.js": {
+      "sha256": "164339682dd86986cbbe986981dadfc54f3933c5cd61fffbe38afba99fc0684c",
+      "hooks": [
+        {
+          "name": "catch_up",
+          "needle": "null!=e&&(0,k.mr)({scope:m,target:o,prediction:e})",
+          "after": false,
+          "expression": "({kind:\"receipt\",site:\"catch_up\",target:o,prediction:e})"
+        },
+        {
+          "name": "submission",
+          "needle": "l:async function({scope:e,prediction:t,threadId:n,submittedTurnId:s,outcome:c,edited:d}){",
+          "after": true,
+          "expression": "({kind:\"submission\",threadId:n,submittedTurnId:s,prediction:t,outcome:c,edited:d??null})"
+        }
+      ]
+    },
+    "907538.0572f09d40.js": {
+      "sha256": "eba5577e16a50a8106a64a05025fa23d0a589d8b4f775a6fe065ba7d916e6b1c",
+      "hooks": [
+        {
+          "name": "live",
+          "needle": "(0,tb.mr)({scope:e,target:c,prediction:_})",
+          "after": false,
+          "expression": "({kind:\"receipt\",site:\"live\",target:c,prediction:_})"
+        },
+        {
+          "name": "interaction",
+          "needle": "z2:function({scope:e,prediction:t,action:n,edited:i}){",
+          "after": true,
+          "expression": "({kind:\"interaction\",prediction:t,action:n,edited:i??null})"
+        }
+      ]
+    }
+  }
+}

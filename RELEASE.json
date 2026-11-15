@@ -1,0 +1,18 @@
+{
+  "releaseTag": "v0.1.0-pilot.1",
+  "prerelease": true,
+  "sourceSnapshot": "review-09",
+  "archive": "prompt-predictor-prototype.zip",
+  "archiveSha256": "d7fc2bfb6e81b2887e999d10a7a4790db1c024585dc9dd09733d5763a89b59d8",
+  "packageManifestSha256": "6acd5e8f95226bf819ac446b06db490b71162b12800a1ebb9e81f1de60001634",
+  "appVersion": "26.1111.2228.0",
+  "evidence": {
+    "javascriptTests": 70,
+    "pythonTestMethods": 18,
+    "cleanTeammateInstallVerified": false,
+    "productionAppReceiptVerified": false
+  },
+  "repository": "tjmills111/prompt-predictor",
+  "visibility": "public",
+  "license": "MIT"
+}
