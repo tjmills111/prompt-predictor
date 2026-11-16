@@ -1,14 +1,16 @@
-# First pilot: checks and limits
+# Prompt Predictor V2 — first pilot: checks and limits
 
-Snapshot `review-09`, proposed release `v0.1.0-pilot.1`. Windows Codex app
+Snapshot `review-09`, release `v0.1.0-pilot.1`. Windows Codex app
 `26.1111.2228.0`, full generalized prompt, Sol 6.1/High, 120-second allowance.
-This is a pilot candidate; a successful teammate run has not yet been observed.
+This is a first pilot; a successful teammate run has not yet been observed.
 
 ## Before starting
 
-Confirm Windows/app build, eligible personal Pro/native-prediction/model access, default
-file-based ChatGPT sign-in, and any managed-PC restrictions or previous helper installation.
-The local installing AI can inspect technical details and handle Node/uv. The person handles
+The installing AI follows the [repository installation request](README.md#start-here),
+downloads/verifies the pinned release and checks Windows/app build, actual native-prediction
+eligibility and Sol access, default file-based ChatGPT sign-in, managed-PC restrictions and
+previous helper installations. Do not ask the person to classify their subscription; preserve
+all account/configuration guards and explain a specific access failure. The AI handles Node/uv. The person handles
 sign-in, necessary security approvals, timing of reopening Codex and normal interaction.
 No separate OpenAI API key is used. Existing conflicting installations are preserved.
 
