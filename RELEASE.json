@@ -1,10 +1,10 @@
 {
-  "releaseTag": "v0.1.0-pilot.1",
+  "releaseTag": "v0.1.0-pilot.2",
   "prerelease": true,
-  "sourceSnapshot": "review-09",
+  "sourceSnapshot": "prompt-balance-2026-11-15",
   "archive": "prompt-predictor-prototype.zip",
-  "archiveSha256": "d7fc2bfb6e81b2887e999d10a7a4790db1c024585dc9dd09733d5763a89b59d8",
-  "packageManifestSha256": "6acd5e8f95226bf819ac446b06db490b71162b12800a1ebb9e81f1de60001634",
+  "archiveSha256": "fe0b3dd45788cdf1d6b24c2e4e9a85a6f74f2d8b0b7ae44ddf9badc6276b4b4a",
+  "packageManifestSha256": "26b2b7673b125bae68203fb03918c47c5aa8863ca9ae737f782ab1262db766ce",
   "appVersion": "26.1111.2228.0",
   "evidence": {
     "javascriptTests": 70,
@@ -14,5 +14,6 @@
   },
   "repository": "tjmills111/prompt-predictor",
   "visibility": "public",
-  "license": "MIT"
+  "license": "MIT",
+  "promptUtf8Bytes": 5489
 }

@@ -28,10 +28,10 @@ Give me a brief results summary to send back, including anything unverified.
 
 1. Read this README and [PILOT.md](PILOT.md). Check Windows 11 and the exact Codex build
    before obtaining dependencies. Explain an unsupported build; do not downgrade the app.
-2. Download **both attached assets** from [release `v0.1.0-pilot.1`](https://github.com/tjmills111/prompt-predictor/releases/tag/v0.1.0-pilot.1):
+2. Download **both attached assets** from [release `v0.1.0-pilot.2`](https://github.com/tjmills111/prompt-predictor/releases/tag/v0.1.0-pilot.2):
    `prompt-predictor-prototype.zip` and `SHA256SUMS.txt`. Verify the ZIP's SHA-256 against
    the checksum file and this pinned value before extracting:
-   `d7fc2bfb6e81b2887e999d10a7a4790db1c024585dc9dd09733d5763a89b59d8`.
+   `fe0b3dd45788cdf1d6b24c2e4e9a85a6f74f2d8b0b7ae44ddf9badc6276b4b4a`.
    Use local storage outside cloud-synced folders and a fresh destination; do not overwrite
    an existing installation. GitHub's automatic source ZIP is not the tested release asset.
 3. Read the extracted `prompt-predictor/README.md` and `INSTALL-WITH-AI.md` in full;
@@ -48,8 +48,9 @@ Give me a brief results summary to send back, including anything unverified.
    with the person. Use the detailed pilot checks, preserve tracker history through Remove
    and Restore, and report what passed, anything unverified and the final working/removed state.
 
-The tested ZIP and its embedded instructions are unchanged. This repository section adds
-AI-managed acquisition and clarifies account checking; it changes no executable behavior.
+This release adds the three-sentence selection/testing refinement to the full generalized
+prompt. The ZIP and manifest include it on the installation path; executable code is unchanged
+from pilot.1. Existing installations stop safely; this is not an updater.
 
 ## What to expect
 
@@ -71,7 +72,7 @@ Actual teammate installation, authenticated app receipt, visible suggestions, si
 remove/restore behavior still need this pilot. Custom fork usage/billing treatment remains
 unestablished. See [pilot checks and evidence limits](PILOT.md).
 
-Source and release correspond to snapshot **`review-09`**. The exact tested ZIP and
+Source and release correspond to snapshot **`prompt-balance-2026-11-15`**. The exact tested ZIP and
 checksum are attached to the release; GitHub's automatic source archive is a different ZIP.
 
 ## License
