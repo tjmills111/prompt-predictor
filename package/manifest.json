@@ -3,7 +3,7 @@
   "prototype": true,
   "owner": "prompt-predictor-prototype-v1",
   "appVersion": "26.1111.2228.0",
-  "promptUtf8Bytes": 5489,
+  "promptUtf8Bytes": 5628,
   "files": {
     "addon.py": "d50c75ce12ba4128d638747b6a43587fbeace9336066579e64945ffe68fd6769",
     "control.py": "705fecf918eefa06095462318067591cc8de7b746a28f13279744e80b50ba22b",
@@ -39,7 +39,7 @@
     "recorder/health.test.mjs": "b2bc443ea7e93585ab0866be31a00d2bf3567ad94a628f1b52171b5b1e90acdf",
     "recorder/recovery.test.mjs": "b858ffbeb5d4b77bbc486f42cb82d3a54fe2db27e230e9574f2bb86bbf902a7c",
     "maintenance/recovery.test.mjs": "9bfeca171b5ea9243477abaef3ad9fc71b73a94bde4ebaec98e125a58fe1ab2e",
-    "prompt.txt": "63a02bdcdb5e3dde6beebc4ab218c57970f64883e52255266bbc7653c7bb5eaf",
+    "prompt.txt": "db2218f004ecfe44dfc4dd6e18a017c2f3a7ab0eb5ae42f59d079b3f1d6154e3",
     "maintenance/codex-state-guard.py": "87f2a5004ba36d15a7612431e8b0023327a7c145386170c719553f7ca11a9cdc",
     "Check.cmd": "c8d989095baadf7920845fb35a9508accc19439b699999f3d847d7ec9cdc62f9",
     "generation/route.test.mjs": "8dfeca05cad0ada109f05fbf2368372052c54e7b0de2c61d60a0bbe61ba5145c",

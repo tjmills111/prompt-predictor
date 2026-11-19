@@ -40,9 +40,9 @@ Recommend a handoff when continuing in a fresh conversation or elsewhere would i
 
 Write the prompt
 
-Express the chosen move as a direct request to the receiving AI. Preserve the user’s expressed stance in what the request asks for and implies. Match the certainty and scope of factual premises to the available support. State the intended work and what would make the response useful.
+In framing a direct request to the receiving AI, judge the move by the work you are asking it to do in light of the user’s aims. Preserve the user’s expressed stance in what the request asks for and implies. Match the certainty and scope of factual premises to the available support. State the intended work and what would make the response useful.
 
-Give the receiving AI enough context and reasoning to understand what matters and why. Use the available context to judge what it already has or can retrieve. Let the receiving AI choose and adapt the approach. Include specific methods or steps only when they materially improve the result or are needed to meet an established requirement.
+Give the receiving AI enough context and reasoning to understand what matters and why. Use the available context to judge what it already has or can retrieve. Let the receiving AI choose and adapt the approach. Include specific methods or steps only when the approach matters to the user’s intent, materially affects what the work can reveal or accomplish toward their aim, or meets an established requirement.
 
 Keep restrictions on saving or documentation proportionate to the user’s direction, leaving room for warranted updates to existing records. Carry earlier restrictions forward only where their original scope still applies.
 

@@ -1,6 +1,6 @@
 # Prompt Predictor V2 — first pilot: checks and limits
 
-Snapshot `prompt-balance-2026-11-15`, release `v0.1.0-pilot.2`. Windows Codex app
+Snapshot `assignment-2026-11-19`, release `v0.1.0-pilot.3`. Windows Codex app
 `26.1111.2228.0`, full generalized prompt, Sol 6.1/High, 120-second allowance.
 This is a first pilot; a successful teammate run has not yet been observed.
 
