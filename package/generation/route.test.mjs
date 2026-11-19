@@ -24,7 +24,7 @@ test('actual adapter tags its full-prompt fetch and preserves remote native fall
     await installBrowserAdapter(profile,deps=>({request:async()=>deps.getConfig(),notify(){},abortAll(){},dispose(){},status:()=>({jobs:0})}));
     const result=await module.services.cumberbatch.requestUserMessagePrediction({hostId:'local'});
     assert.equal(result.prompt,'full-fixture');
-    assert.deepEqual(module.lastRequest.headers,{'x-prompt-predictor-route':'fork-v1'});
+    assert.deepEqual(module.lastRequest.headers,{'x-prompt-predictor-route':'fork-v1','x-predictor-local-cache':'1'});
     assert.equal(await module.services.cumberbatch.requestUserMessagePrediction({hostId:'ssh'}),'native');
     assert.equal(module.fallbackCalls,1);
     module.dropReceipt();

@@ -23,7 +23,7 @@ export async function installBrowserAdapter(profile, createEngine) {
   const original = services?.cumberbatch;
   if (!original || !services.httpFetch || !services.settings || !Callback || !bridge || !consume) return { state: 'waiting_for_services' };
   const pending = new Map(), subscriptions = [], callbacks = [];
-  let ready = false, enabled = false, policy, disableMcp = true, lastEvent = null, stopped = false;
+  let ready = false, enabled = false, policyReady = false, policy, lastEvent = null, stopped = false;
   let releasePreference;
   const preferenceReady = new Promise(resolve => { releasePreference = resolve; });
   async function isEnabled() {
@@ -48,20 +48,48 @@ export async function installBrowserAdapter(profile, createEngine) {
   });
   async function getConfig() {
     const id = 'composer-astra-config:' + crypto.randomUUID();
-    const call = services.httpFetch.fetch(id, { url: '/wham/predictions/config', method: 'GET', headers: {'x-prompt-predictor-route': 'fork-v1'} });
+    const call = services.httpFetch.fetch(id, { url: '/wham/predictions/config', method: 'GET', headers: {'x-prompt-predictor-route': 'fork-v1', 'x-predictor-local-cache': '1' } });
     try { const result = await call; if (!result.response?.ok) throw Error('Prediction configuration unavailable'); const config = await result.response.json(); if(config._prompt_predictor_route !== 'fork-v1') { log({event:'configuration_failed',error:'Custom prompt receipt missing; refusing stock prediction'}); throw Error('Custom prompt receipt missing; refusing stock prediction'); } return config; }
     finally { call[Symbol.dispose]?.(); }
   }
-  const engine = createEngine({ rpc, getConfig, isEnabled, getPolicy: () => policy, disableMcp: () => disableMcp, hash: async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), b => b.toString(16).padStart(2, '0')).join(''), event: log, fallback: (target, callback) => consume(original.requestUserMessagePrediction(target, callback)) }, profile);
+  // Keep a small recent set in the app's own origin across renderer lifetimes.
+  const storageKey = 'prompt-predictor.finished.v1';
+  function recent() {
+    const entries = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    return entries.filter(entry => Date.now() - entry.at < 86400000);
+  }
+  function readSaved(key) {
+    try { return recent().find(entry => entry.key === key)?.value; } catch { return undefined; }
+  }
+  function writeSaved(key, value) {
+    try {
+      const entries = recent().filter(entry => entry.key !== key).slice(0, 31);
+      localStorage.setItem(storageKey, JSON.stringify([{ key, at: Date.now(), value }, ...entries]));
+    } catch { /* Storage unavailable: generation and in-memory reuse still work. */ }
+  }
+  const engine = createEngine({ readSaved, writeSaved, rpc, getConfig, isEnabled, getPolicy: () => policy, policyReady: () => policyReady, disableMcp: () => true, hash: async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), b => b.toString(16).padStart(2, '0')).join(''), event: log, fallback: (target, callback) => consume(original.requestUserMessagePrediction(target, callback)) }, profile);
   const listener = e => { let d = e.data; if (typeof d === 'string') { try { d = JSON.parse(d); } catch { return; } } if (d?.type === 'mcp-notification') engine.notify(d.hostId, d.method, d.params); };
   window.addEventListener('message', listener);
   const settingsCallback = new Callback(value => { if (stopped) return; const next = value.effective === true; if (ready && next !== enabled) engine.abortAll('Prediction preference changed'); enabled = next; ready = true; releasePreference(); });
+  let publishedIdentity;
   const evaluationsCallback = new Callback(value => {
-    const evaluation = JSON.parse(value.payload);
-    const nextPolicy = evaluation.dynamic_configs?.['3941626706']?.value;
-    if (JSON.stringify(policy) !== JSON.stringify(nextPolicy)) engine.abortAll('Prediction policy changed');
+    if (stopped) return;
+    const identity = JSON.stringify([value?.userId, value?.accountId]);
+    let nextPolicy;
+    if (value?.hasEvaluations && value.userId && value.accountId && value.sdkKey) {
+      const client = globalThis.__STATSIG__?.instances?.[value.sdkKey];
+      const user = client?.getContext()?.user;
+      if (client?.loadingStatus === 'Ready' && user?.userID === value.userId &&
+          user.customIDs?.account_id === value.accountId) {
+        const config = client.getDynamicConfig('codex-app-cumberbatch-mod-policy', { disableExposureLog: true });
+        if (config?.details?.reason?.endsWith(':Recognized') && config.value &&
+            typeof config.value === 'object' && !Array.isArray(config.value)) nextPolicy = config.value;
+      }
+    }
+    if (publishedIdentity !== identity || JSON.stringify(policy) !== JSON.stringify(nextPolicy)) engine.abortAll('Prediction identity or policy changed');
+    publishedIdentity = identity;
     policy = nextPolicy;
-    disableMcp = evaluation.feature_gates?.['1558648544']?.value === true;
+    policyReady = nextPolicy !== undefined;
   });
   callbacks.push(settingsCallback, evaluationsCallback);
   try {
@@ -78,7 +106,7 @@ export async function installBrowserAdapter(profile, createEngine) {
     owner: 'prompt-predictor-prototype-v1',
     revision: profile.revision,
     service: wrapper,
-    status: () => ({ state: stopped ? 'disabled' : 'active', preferenceReady: ready, revision: profile.revision, model: profile.model, effort: profile.effort, timeoutMs: profile.timeoutMs, ...engine.status(), lastEvent }),
+    status: () => ({ state: stopped ? 'disabled' : 'active', preferenceReady: ready, policyReady, revision: profile.revision, model: profile.model, effort: profile.effort, timeoutMs: profile.timeoutMs, ...engine.status(), lastEvent }),
     async dispose() {
       stopped = true; if (services.cumberbatch === wrapper) services.cumberbatch = original;
       releasePreference();

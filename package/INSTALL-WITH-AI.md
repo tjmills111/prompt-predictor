@@ -11,8 +11,8 @@ Install Prompt Predictor from this extracted folder, using its supplied scripts 
 manifest. Complete setup and verification as far as this machine/account permits.
 Read README.md and this file. Do not rebuild the implementation or copy my personal
 context into it. This is a fresh-install pilot; preserve existing installations and work.
-For the agreed removal test, finish with the tool working again unless I explicitly ask
-to leave it removed. That return uses the narrow Restore action below, not a fresh reinstall.
+Finish with the tool installed and verified. Only run the optional removal and Restore
+exercise below if I separately request a lifecycle test.
 Before obtaining dependencies, check the target OS, installed Codex build and sign-in
 requirements. Explain any unsupported machine/account requirement before spending effort
 on setup. The full tool targets Windows Codex; the AI doing installation may be different.
@@ -68,7 +68,7 @@ run automated scoring or claim model learning. Test another maintained-launcher 
 sign-in monitoring remains unverified until actually observed. End with what is proven
 and any missing evidence, not a generic installed-success claim.
 
-For the agreed removal check, run installed Manage.ps1 -Action Remove. Verify its receipt,
+Stop here for an ordinary installation. For an explicitly requested removal check, run installed Manage.ps1 -Action Remove. Verify its receipt,
 removal of owned startup/shortcut/monitor, restored routing and removed certificate trust,
 and retained tracker data. Before removal, note IDs and text hashes of completed tracker
 pairs so preservation can be checked later without expecting live database bytes/counts

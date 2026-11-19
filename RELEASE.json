@@ -1,13 +1,13 @@
 {
-  "releaseTag": "v0.1.0-pilot.3",
+  "releaseTag": "v0.1.0-pilot.4",
   "prerelease": true,
-  "sourceSnapshot": "assignment-2026-11-19",
+  "sourceSnapshot": "team-cache-reviewed",
   "archive": "prompt-predictor-prototype.zip",
-  "archiveSha256": "8bac7884a8de811fdd3efb86c9a2d63d8c062cf699b45093f1946fb68719ee26",
-  "packageManifestSha256": "66a212b2a2550b72a8b83610ed160ee605650b592809c2f0b8f55477c3fa66ef",
+  "archiveSha256": "38dc3188a783267e82c20ccda2181ca0bf287a14417a87fcdc3eceb32a6cc888",
+  "packageManifestSha256": "20878ad58e291d714212df0be3bc2532eac8cf3ae3eda32f497fe23386aa956f",
   "appVersion": "26.1111.2228.0",
   "evidence": {
-    "javascriptTests": 70,
+    "javascriptTests": 72,
     "pythonTestMethods": 18,
     "cleanTeammateInstallVerified": false,
     "productionAppReceiptVerified": false

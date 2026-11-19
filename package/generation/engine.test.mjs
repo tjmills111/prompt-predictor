@@ -12,7 +12,8 @@ function fixture(options = {}) {
   const config = { is_enabled: true, prompt: 'Approved prompt', prompt_version: '5', prediction_reasoning_effort: 'high', unsupported_models: ['gpt-6-sol'], live_sample_rate: 1, catch_up_sample_rate: 1 };
   let engine;
   const deps = {
-    isEnabled: async () => enabled, getConfig: async () => config, getPolicy: () => options.policy,
+    readSaved: key => options.storage?.get(key), writeSaved: (key, value) => options.storage?.set(key, value),
+    isEnabled: async () => enabled, getConfig: async () => { await options.configGate; return config; }, getPolicy: () => options.policy, policyReady: () => true,
     hash: async s => createHash('sha256').update(s).digest('hex'), event: e => events.push(e),
     setTimeout: fn => { timeout = fn; return 1; }, clearTimeout: () => {},
     rpc: async (host, method, params) => {
@@ -118,5 +119,40 @@ test('always-suggest contract is enforced in server schema and rejects cached bl
     await assert.rejects(f.engine.request(target), /Invalid prediction JSON/);
     await assert.rejects(f.engine.request(target), /Invalid prediction JSON/);
     assert.equal(f.calls.filter(c => c.method === 'thread/fork').length, 2);
+  }
+});
+
+test('replacement engine reuses only the matching account, policy, profile and current reply', async () => {
+  const storage = new Map();
+  function fresh(account = 'a', policy = {}) {
+    const f = fixture({storage, policy});
+    f.config.localAccountHash = account;
+    return f;
+  }
+  const first = await fresh().engine.request(target);
+  const reopened = fresh();
+  const value = await reopened.engine.request({...target, generationTrigger: 'catch_up'});
+  assert.equal(value.predictionThreadId, first.predictionThreadId);
+  assert.ok(!reopened.calls.some(c => c.method === 'thread/fork'));
+  const revised = fresh(); revised.config.prompt += ' revised';
+  const newer = fresh(); newer.changeSource();
+  for (const [f, source] of [[fresh('b'), target], [fresh('a', {ubl:['blocked']}), target],
+                             [revised, target], [newer, {...target, latestTurnId:'new-turn'}]]) {
+    await f.engine.request(source);
+    assert.ok(f.calls.some(c => c.method === 'thread/fork'));
+  }
+});
+
+test('identity invalidation or adapter disposal during configuration prevents stale generation', async () => {
+  for (const invalidate of [engine => engine.abortAll('Account changed'), engine => engine.dispose()]) {
+    let release;
+    const configGate = new Promise(resolve => { release = resolve; });
+    const f = fixture({configGate});
+    const pending = f.engine.request(target);
+    await tick();
+    invalidate(f.engine);
+    release();
+    await assert.rejects(pending, {name:'AbortError'});
+    assert.equal(f.calls.length, 0);
   }
 });

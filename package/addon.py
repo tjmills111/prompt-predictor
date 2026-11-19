@@ -31,6 +31,7 @@ def requestheaders(flow):
     if not target:
         req.stream = True
         return
+    flow.metadata['local_cache'] = req.headers.pop('x-predictor-local-cache', '') == '1'
     try:
         config = json.loads((STATE / 'settings.json').read_text())
         match = digest(req.headers.get('chatgpt-account-id', '')) == config['account_sha256']
@@ -72,6 +73,9 @@ def response(flow):
             data['catch_up_sample_rate'] = 1.0
             original = json.loads(original_text)
             changed_fields = sorted(key for key in data if data[key] != original.get(key))
+            if flow.metadata.get('local_cache') and flow.request.headers.get('authorization'):
+                # A credential rotation costs a cache miss. Never expose the credential.
+                data['localAccountHash'] = digest(settings['account_sha256'] + ':' + flow.request.headers['authorization'])
             flow.response.text = json.dumps(data, ensure_ascii=False)
             for header in ('etag', 'content-md5', 'digest'):
                 flow.response.headers.pop(header, None)

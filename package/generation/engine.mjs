@@ -3,7 +3,7 @@ export function createPredictionEngine(deps, profile) {
   const jobs = new Map(), cache = new Map(), moderation = new Map();
   const now = deps.now ?? Date.now;
   const timer = deps.setTimeout ?? setTimeout, clearTimer = deps.clearTimeout ?? clearTimeout;
-  let disposed = false;
+  let disposed = false, contextVersion = 0;
   const abortError = reason => new DOMException(reason || 'Prediction cancelled', 'AbortError');
   const emit = (event, data = {}) => deps.event?.({ event, at: new Date(now()).toISOString(), ...data });
   const sourceKey = t => JSON.stringify([t.hostId, t.threadId, t.latestTurnId]);
@@ -38,7 +38,7 @@ export function createPredictionEngine(deps, profile) {
       deps.rpc(job.target.hostId, 'turn/interrupt', { threadId: job.childId, turnId: job.turnId }, 10000).catch(e => emit('cleanup_error', { childId: job.childId, error: String(e) }));
     }
   }
-  function abortAll(reason) { for (const job of jobs.values()) cancel(job, reason); cache.clear(); }
+  function abortAll(reason) { contextVersion++; for (const job of jobs.values()) cancel(job, reason); cache.clear(); }
   function notify(hostId, method, params) {
     if (method === 'account/updated' || method === 'account/login/completed') { abortAll('Account changed'); moderation.clear(); return; }
     if (method === 'turn/moderationMetadata' && params?.threadId && params?.turnId) {
@@ -79,6 +79,15 @@ export function createPredictionEngine(deps, profile) {
       const reason = parent.collaborationMode?.mode === 'plan' ? 'plan_mode' : parent.modelProvider !== 'openai' ? 'unsupported_provider' : config.unsupported_models?.includes(profile.model) ? 'unsupported_model' : null;
       if (reason) { ineligible?.({ reason, hostKind: 'local', model: profile.model, parentReasoningEffort: parent.reasoningEffort, promptVersion: config.prompt_version }); return null; }
       await latest(target); check();
+      const account = config.localAccountHash;
+      const policy = JSON.stringify(deps.getPolicy?.() ?? null);
+      const savedKey = account && deps.policyReady?.() && JSON.stringify([account, job.key, policy]);
+      const saved = savedKey ? deps.readSaved?.(savedKey) : null;
+      if (account && saved?.sourceTurnId === target.latestTurnId &&
+          saved.predictionProfileHash === job.key.slice(-64) &&
+          saved.text?.trim() && !policyDecision(moderation.get(sourceKey(target)), deps.getPolicy?.())) {
+        return { ...saved, generationTrigger: target.generationTrigger };
+      }
       // Do not abandon an in-flight fork on cancellation: consume its result, then unsubscribe it.
       const fork = await deps.rpc(target.hostId, 'thread/fork', { threadId: target.threadId, experimentalPredictionMode: true, experimentalDisablePredictionMcp: deps.disableMcp?.() ?? true, config: { thread_unload_delay_secs: 10 }, ephemeral: true, excludeTurns: true, threadSource: 'composer_predictions' });
       job.childId = fork.thread.id; check();
@@ -95,9 +104,11 @@ export function createPredictionEngine(deps, profile) {
       if (!parsed || !Object.hasOwn(parsed, 'suggestion') || (typeof parsed.suggestion !== 'string' || !parsed.suggestion.trim()) || Object.keys(parsed).some(k => k !== 'suggestion')) throw Error('Invalid prediction JSON');
       await latest(target); check();
       if (!await deps.isEnabled()) return null;
+      check();
       const suppression = policyDecision(moderation.get(sourceKey(target)), deps.getPolicy?.());
       if (suppression) { emit('suppressed', { ...target, childId: job.childId, policy: suppression }); return null; }
       const answer = { requestedAt: job.requestedAt, hostKind: 'local', text: parsed.suggestion || null, predictionThreadId: job.childId, predictionTurnId: job.turnId, generationTrigger: target.generationTrigger, generationSource: 'composer_astra_adapter', predictionProfileHash: job.key.slice(-64), sourceTurnId: target.latestTurnId, model: profile.model, reasoningEffort: profile.effort, serviceTier: profile.serviceTier ?? 'default', parentServiceTier: parent.serviceTier, parentModel: parent.model, parentReasoningEffort: parent.reasoningEffort, configuredReasoningEffort: profile.effort, promptVersion: config.prompt_version, totalDurationMs: now() - job.started, inputTokens: job.usage?.inputTokens, cachedInputTokens: job.usage?.cachedInputTokens };
+      if (savedKey && policy === JSON.stringify(deps.getPolicy?.() ?? null)) deps.writeSaved?.(savedKey, answer);
       emit('completed', { ...target, childId: job.childId, model: profile.model, effort: profile.effort, durationMs: answer.totalDurationMs, generationMs: now() - job.generationStarted, textCharacters: answer.text?.length ?? 0 });
       return answer;
     } catch (error) { emit(signal.aborted ? 'cancelled' : 'failed', { ...target, childId: job.childId, error: String(error) }); throw error; }
@@ -113,21 +124,26 @@ export function createPredictionEngine(deps, profile) {
   function request(target, ineligible) {
     let release = () => {}, released = false;
     const local = new AbortController();
+    const version = contextVersion;
+    function checkContext() {
+      if (local.signal.aborted) throw local.signal.reason;
+      if (disposed || version !== contextVersion) throw abortError('Prediction context changed');
+    }
     const promise = (async () => {
       if (disposed) throw abortError('Adapter disabled');
       if (target.hostId !== 'local') return await deps.fallback(target, ineligible);
       if (!await deps.isEnabled()) return null;
-      const config = await deps.getConfig();
+      const config = await deps.getConfig(target);
       if (!validateConfig(config) || !config.is_enabled) return null;
-      if (local.signal.aborted) throw local.signal.reason;
+      checkContext();
       const rate = (target.generationTrigger === 'live' ? config.live_sample_rate : config.catch_up_sample_rate) ?? 1;
       if (rate < 1 && (deps.random ?? Math.random)() >= rate) return null;
       const revision = await deps.hash(JSON.stringify([config.prompt, config.prompt_version, profile.model, profile.effort, profile.timeoutMs, profile.serviceTier ?? 'default', profile.revision ?? null]));
-      const key = sourceKey(target) + ':' + revision;
-      if (local.signal.aborted) throw local.signal.reason;
-      if (cache.has(key)) { await latest(target); const value = cache.get(key); return value == null ? null : { ...value, generationTrigger: target.generationTrigger }; }
+      const key = (config.localAccountHash || '') + sourceKey(target) + ':' + revision;
+      checkContext();
+      if (cache.has(key) && !config.unsupported_models?.includes(profile.model)) { await latest(target); checkContext(); const value = cache.get(key); return value == null ? null : { ...value, generationTrigger: target.generationTrigger }; }
       for (const [k, j] of jobs) if (j.target.hostId === target.hostId && j.target.threadId === target.threadId && k !== key) cancel(j, 'Source or prediction profile changed');
-      for (const k of cache.keys()) if (k.startsWith(JSON.stringify([target.hostId, target.threadId]).slice(0, -1) + ',') && k !== key) cache.delete(k);
+      for (const k of cache.keys()) if (k.startsWith((config.localAccountHash || '') + JSON.stringify([target.hostId, target.threadId]).slice(0, -1) + ',') && k !== key) cache.delete(k);
       let job = jobs.get(key);
       if (!job) {
         job = { key, target, started: now(), requestedAt: new Date(now()).toISOString(), refs: 0, controller: new AbortController(), completed: false, settled: false };

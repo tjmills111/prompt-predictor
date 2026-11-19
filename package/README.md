@@ -4,7 +4,7 @@ Full custom prediction generation, local comparison tracking, red authorship col
 reliability monitoring and guarded Windows startup. This is an unofficial prototype,
 not a published or clean-machine-verified installer. No automatic sending or data upload.
 
-**Start here:** give this extracted folder to a local coding AI and paste the request in
+**Start here:** open the extracted package folder in Codex and ask it to follow the request in
 [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md). The AI can obtain dependencies, run setup and check
 the results. You should only need to handle sign-in, required local approvals and when
 to reopen Codex. Claude Code or another IDE agent can install it, but the target is the

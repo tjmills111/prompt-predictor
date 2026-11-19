@@ -9,6 +9,12 @@ const source = { hostId: 'local', threadId: 'source', latestTurnId: 'source-turn
 
 // Actual adapter + engine, with isolated settings/bridge/backend services. No desktop connection.
 async function deliveryFixture(t, { autoComplete = true, text = '{"suggestion":"Exact cached prediction."}' } = {}) {
+  const previousSdk = globalThis.__STATSIG__;
+  globalThis.__STATSIG__ = {instances:{test:{loadingStatus:'Ready',
+    getContext: () => ({user:{userID:'u',customIDs:{account_id:'a'}}}),
+    getDynamicConfig: name => { assert.equal(name, 'codex-app-cumberbatch-mod-policy'); return {details:{reason:'Network:Recognized'},value:{st:{},ubl:[],abl:[]}}; }
+  }}};
+  t.after(() => { globalThis.__STATSIG__ = previousSdk; });
   const priorWindow = globalThis.window;
   globalThis.window = new EventTarget();
   const fixtureWindow = globalThis.window;
@@ -29,7 +35,7 @@ async function deliveryFixture(t, { autoComplete = true, text = '{"suggestion":"
     export const consume = async handle => { try { return await handle; } finally { handle[Symbol.dispose]?.(); } };
     export const services = {
       cumberbatch: { isEnabledByRemoteConfig: async () => true, requestUserMessagePrediction: async () => null }, settings,
-      statsigEvaluations: { subscribe: async cb => { cb.fn({payload:'{}'}); return {unsubscribe:async()=>{}}; } },
+      statsigEvaluations: { subscribe: async cb => { cb.fn({userId:'u',accountId:'a',authMethod:'chatgpt',stableId:'s',sdkKey:'test',hasEvaluations:true,defaultEnableFeatures:{},executionValues:{}}); return {unsubscribe:async()=>{}}; } },
       httpFetch: { fetch: async () => ({response:{ok:true,json:async()=>({is_enabled:true,prompt:'Unchanged test prompt',_prompt_predictor_route:'fork-v1',prompt_version:'5',prediction_reasoning_effort:'high',live_sample_rate:1,catch_up_sample_rate:1})}}) }
     };
   `);
@@ -60,6 +66,7 @@ async function deliveryFixture(t, { autoComplete = true, text = '{"suggestion":"
 
 test('initial preference delivery is awaited, never cached by the native caller as a successful blank', { timeout: 3000 }, async t => {
   const f = await deliveryFixture(t);
+  assert.equal(globalThis.__COMPOSER_ASTRA_ADAPTER.status().policyReady, true);
   assert.equal(globalThis.__COMPOSER_ASTRA_ADAPTER.status().preferenceReady, false);
   let settled = false;
   const pending = f.module.consume(f.request()).then(value => { settled = true; return value; });
